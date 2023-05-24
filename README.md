@@ -6,3 +6,5 @@ My Kaggle Titanic Juypter Notebook - https://www.kaggle.com/code/justinzhang/tit
 Tableau Data Science Project - Superstore Sales:  https://public.tableau.com/app/profile/xiangli.zhang/viz/Superstore_16839293595450/ExecutiveOverview#1
 
 R Shiny Project - https://justin-zhang.shinyapps.io/census-app/
+
+Linkedin - https://www.linkedin.com/in/justinzh/
