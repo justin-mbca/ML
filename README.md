@@ -7,4 +7,6 @@ Tableau Data Science Project - Superstore Sales:  https://public.tableau.com/app
 
 R Shiny Project - https://justin-zhang.shinyapps.io/census-app/
 
+Web Scrapper Juyper Notebook - https://github.com/justin-mbca/ML/blob/main/AmazonProduct.ipynb
+
 Linkedin - https://www.linkedin.com/in/justinzh/
