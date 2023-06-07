@@ -3,8 +3,6 @@ Resource Wiki - https://github.com/justin-mbca/ML/wiki
 
 My Kaggle Titanic Juypter Notebook - https://www.kaggle.com/code/justinzhang/titanic-justin/notebook
 
-My Kaggle NLP Juypter Notebook - https://www.kaggle.com/code/justinzhang/chatgpt-4-tweets-analysis-eda
-
 Tableau Data Science Project - Superstore Sales:  https://public.tableau.com/app/profile/xiangli.zhang/viz/Superstore_16839293595450/ExecutiveOverview#1
 
 R Shiny Project - https://justin-zhang.shinyapps.io/census-app/
