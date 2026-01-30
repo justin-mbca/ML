@@ -1,0 +1,102 @@
+Package: ClinicalUtils
+Title: Clinical Data Processing Utilities for Clinical Trials
+Version: 1.0.0
+Authors@R: 
+    person("Justin", "Zhang", 
+           email = "justin@example.com",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0000-0000-0000"))
+Description: A comprehensive R package for clinical trial data processing,
+    analysis, and reporting. This package provides utilities for CDISC SDTM/ADaM
+    data manipulation, pharmacometric analysis, regulatory submission preparation,
+    and clinical trial workflow automation. Designed for pharmaceutical and
+    clinical research environments with focus on reproducibility, validation,
+    and compliance with regulatory standards.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Depends: R (>= 4.2.0)
+Imports:
+    dplyr,
+    tidyr,
+    lubridate,
+    ggplot2,
+    plotly,
+    DT,
+    shiny,
+    shinydashboard,
+    readr,
+    haven,
+    xpt,
+    jsonlite,
+    xml2,
+    data.table,
+    stringr,
+    purrr,
+    tibble,
+    lifecycle,
+    rlang,
+    vctrs,
+    cli,
+    crayon,
+    checkmate,
+    knitr,
+    rmarkdown,
+    hms,
+    snakecase,
+    glue
+Suggests:
+    testthat (>= 3.0.0),
+    covr,
+    lintr,
+    spelling,
+    pkgdown,
+    pharmaverse,
+    admiral,
+    xgxr,
+    ggsci,
+    patchwork,
+    flextable,
+    officer,
+    openxlsx,
+    readxl,
+    DBI,
+    odbc,
+    pool,
+    httr,
+    jsonvalidate,
+    yaml,
+    config,
+    here,
+    fs,
+    zip,
+    openssl,
+    sodium
+VignetteBuilder: knitr
+URL: https://github.com/justin-mbca/ClinicalUtils
+BugReports: https://github.com/justin-mbca/ClinicalUtils/issues
+Date: 2024-01-30
+Collate:
+    'aaa.R'
+    'utils.R'
+    'cdisc.R'
+    'data_validation.R'
+    'pharmaco.R'
+    'regulatory.R'
+    'shiny_modules.R'
+    'export.R'
+    'import.R'
+    'quality_control.R'
+    'statistics.R'
+    'visualization.R'
+    'workflows.R'
+    'documentation.R'
+    'zzz.R'
+Remotes:
+    pharmaverse/admiral
+    pharmaverse/pharmaverse
+Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+Config/Needs/coverage: covr
