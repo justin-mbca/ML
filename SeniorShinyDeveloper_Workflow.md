@@ -5,35 +5,35 @@
 ```mermaid
 graph TB
     %% Study Design Phase
-    subgraph "Study Design & Setup"
+    subgraph StudyDesign["Study Design & Setup"]
         A[Protocol Development<br/>• Study Objectives<br/>• Endpoints Definition<br/>• Statistical Analysis Plan]
         B[CRF Design<br/>• Case Report Forms<br/>• Data Collection<br/>• Validation Rules]
         C[Database Setup<br/>• EDC Configuration<br/>• User Management<br/>• Access Controls]
     end
 
     %% Data Collection Phase
-    subgraph "Data Collection & Entry"
+    subgraph DataCollection["Data Collection & Entry"]
         D[Clinical Sites<br/>• Data Entry<br/>• Query Resolution<br/>• Source Verification]
         E[Data Management<br/>• Data Cleaning<br/>• Medical Coding<br/>• Reconciliation]
         F[Safety Monitoring<br/>• AE Reporting<br/>• SAE Tracking<br/>• DSMB Reviews]
     end
 
     %% Data Processing Phase
-    subgraph "Data Processing & Analysis"
+    subgraph DataProcessing["Data Processing & Analysis"]
         G[SAS Data Processing<br/>• Data Extraction<br/>• Dataset Creation<br/>• Statistical Analysis]
         H[R Migration Pipeline<br/>• SAS to R Conversion<br/>• CDISC Implementation<br/>• Validation Framework]
         I[Advanced Analytics<br/>• PK/PD Modeling<br/>• Bayesian Analysis<br/>• Machine Learning]
     end
 
     %% Regulatory Submission Phase
-    subgraph "Regulatory & Submission"
+    subgraph Regulatory["Regulatory & Submission"]
         J[Submission Preparation<br/>• CSR Development<br/>• Document Assembly<br/>• Quality Control]
         K[Regulatory Review<br/>• Authority Queries<br/>• Response Management<br/>• Lifecycle Management]
         L[Post-Marketing<br/>• Safety Surveillance<br/>• Signal Detection<br/>• Risk Management]
     end
 
     %% Your Portfolio Applications
-    subgraph "Your Shiny Portfolio Solutions"
+    subgraph Portfolio["Your Shiny Portfolio Solutions"]
         M[Clinical Data Viewer<br/>• SDTM/ADaM Visualization<br/>• Interactive Analysis<br/>• Export Functions]
         N[Regulatory Tracker<br/>• Submission Pipeline<br/>• Task Management<br/>• Document Control]
         O[SAS to R Workflow<br/>• Code Conversion<br/>• Performance Comparison<br/>• Migration Tools]
@@ -83,7 +83,6 @@ graph TB
 
     class A,B,C,D,E,F,G,H,I,J,K,L phase
     class M,N,O,P,Q,R,S,T,U portfolio
-end
 ```
 
 ## 🔄 **SAS to R Migration Workflow**
@@ -91,35 +90,35 @@ end
 ```mermaid
 flowchart TD
     %% Legacy SAS Environment
-    subgraph "Legacy SAS Environment"
+    subgraph LegacySAS["Legacy SAS Environment"]
         A1[SAS Programs<br/>• DATA Steps<br/>• PROC SQL<br/>• PROC MEANS<br/>• PROC FREQ]
         A2[SAS Datasets<br/>• SDTM Structure<br/>• ADaM Creation<br/>• Analysis Files]
         A3[SAS Infrastructure<br/>• SAS Server<br/>• Batch Processing<br/>• Legacy Codebase]
     end
 
     %% Migration Assessment
-    subgraph "Migration Assessment"
+    subgraph Migration["Migration Assessment"]
         B1[Code Analysis<br/>• Complexity Assessment<br/>• Dependency Mapping<br/>• Risk Evaluation]
         B2[Performance Baseline<br/>• Execution Time<br/>• Memory Usage<br/>• Output Validation]
         B3[Migration Planning<br/>• Prioritization<br/>• Resource Allocation<br/>• Timeline Development]
     end
 
     %% R Implementation
-    subgraph "R Implementation"
+    subgraph RImpl["R Implementation"]
         C1[Code Conversion<br/>• DATA Steps → dplyr<br/>• PROC SQL → dbplyr<br/>• PROC MEANS → summarise<br/>• PROC FREQ → table]
         C2[Package Migration<br/>• Base R → tidyverse<br/>• SAS/STAT → R packages<br/>• Custom Functions]
         C3[Performance Optimization<br/>• Parallel Processing<br/>• Memory Management<br/>• Caching Strategies]
     end
 
     %% Validation & Testing
-    subgraph "Validation & Testing"
+    subgraph Validation["Validation & Testing"]
         D1[Statistical Validation<br/>• Output Comparison<br/>• Numerical Precision<br/>• Edge Cases]
         D2[Functional Testing<br/>• Unit Tests<br/>• Integration Tests<br/>• User Acceptance]
         D3[Performance Testing<br/>• Benchmark Comparison<br/>• Load Testing<br/>• Scalability Analysis]
     end
 
     %% Production Deployment
-    subgraph "Production Deployment"
+    subgraph Production["Production Deployment"]
         E1[Infrastructure Setup<br/>• R Server<br/>• Shiny Server<br/>• Database Integration]
         E2[User Training<br/>• Documentation<br/>• Best Practices<br/>• Support Materials]
         E3[Monitoring & Support<br/>• Error Tracking<br/>• Performance Metrics<br/>• Continuous Improvement]
@@ -171,42 +170,42 @@ flowchart TD
 ```mermaid
 graph TB
     %% Infrastructure Layer
-    subgraph "Infrastructure & DevOps"
+    subgraph Infra["Infrastructure & DevOps"]
         A[Cloud Infrastructure<br/>• AWS/Azure/GCP<br/>• Container Orchestration<br/>• Auto-scaling]
         B[CI/CD Pipeline<br/>• GitHub Actions<br/>• Automated Testing<br/>• Deployment Automation]
         C[Monitoring & Logging<br/>• Application Performance<br/>• Error Tracking<br/>• User Analytics]
     end
 
     %% Data Engineering Layer
-    subgraph "Data Engineering"
+    subgraph DataEng["Data Engineering"]
         D[Data Sources<br/>• Clinical Databases<br/>• SAS Datasets<br/>• External APIs<br/>• File Systems]
         E[Data Processing<br/>• ETL Pipelines<br/>• Real-time Streaming<br/>• Batch Processing<br/>• Data Validation]
         F[Data Storage<br/>• Relational Databases<br/>• NoSQL Solutions<br/>• Data Lakes<br/>• Caching Layers]
     end
 
     %% Application Development Layer
-    subgraph "Application Development"
+    subgraph AppDev["Application Development"]
         G[Frontend Development<br/>• Shiny UI/UX<br/>• JavaScript Integration<br/>• Responsive Design<br/>• Accessibility]
         H[Backend Development<br/>• R Server Logic<br/>• API Development<br/>• Session Management<br/>• Security]
         I[Package Development<br/>• R Package Creation<br/>• Documentation<br/>• Testing Framework<br/>• Version Control]
     end
 
     %% Analytics & ML Layer
-    subgraph "Analytics & Machine Learning"
+    subgraph Analytics["Analytics & Machine Learning"]
         J[Statistical Analysis<br/>• Clinical Statistics<br/>• PK/PD Modeling<br/>• Bayesian Methods<br/>• Survival Analysis]
         K[Machine Learning<br/>• Predictive Modeling<br/>• Natural Language Processing<br/>• Computer Vision<br/>• Deep Learning]
         L[Advanced Analytics<br/>• Real-time Analytics<br/>• Interactive Visualization<br/>• Reporting Automation<br/>• Decision Support]
     end
 
     %% Domain Expertise Layer
-    subgraph "Domain Expertise"
+    subgraph Domain["Domain Expertise"]
         M[CDISC Standards<br/>• SDTM Implementation<br/>• ADaM Creation<br/>• Define-XML<br/>• Controlled Terminology]
         N[Regulatory Compliance<br/>• GxP Requirements<br/>• Validation Documentation<br/>• Audit Trails<br/>• 21 CFR Part 11]
         O[Pharmaceutical Science<br/>• Clinical Trials<br/>• Drug Development<br/>• Pharmacometrics<br/>• Safety Monitoring]
     end
 
     %% Your Portfolio Integration
-    subgraph "Portfolio Applications"
+    subgraph Portfolio["Portfolio Applications"]
         P[8 Production Shiny Apps<br/>• Clinical Data Viewer<br/>• Regulatory Tracker<br/>• SAS to R Workflow<br/>• PharmacoModel<br/>• HPC Dashboard<br/>• Pharmaverse<br/>• GxP Compliance<br/>• LLM Analytics]
         Q[ClinicalUtils Package<br/>• Reusable Functions<br/>• Validation Tools<br/>• Statistical Methods<br/>• CDISC Utilities]
     end
@@ -251,7 +250,6 @@ graph TB
     class J,K,L analytics
     class M,N,O domain
     class P,Q portfolio
-end
 ```
 
 ## 🎯 **Position Requirements Mapping**
@@ -365,25 +363,25 @@ quadrantChart
 
 ```mermaid
 graph LR
-    subgraph "Core Technologies"
+    subgraph Core["Core Technologies"]
         A[R Language<br/>• Base R<br/>• tidyverse<br/>• Shiny]
         B[SAS Integration<br/>• haven<br/>• sas7bdat<br/>• xport]
         C[Database<br/>• PostgreSQL<br/>• Oracle<br/>• SQL Server]
     end
 
-    subgraph "Web Technologies"
+    subgraph Web["Web Technologies"]
         D[Frontend<br/>• HTML/CSS/JS<br/>• Plotly.js<br/>• DataTables]
         E[Backend<br/>• Plumber API<br/>• Shiny Server<br/>• Posit Connect]
         F[Deployment<br/>• Docker<br/>• Kubernetes<br/>• Cloud Services]
     end
 
-    subgraph "Data Science"
+    subgraph DS["Data Science"]
         G[Statistics<br/>• Clinical Stats<br/>• PK/PD Modeling<br/>• Bayesian Methods]
         H[Machine Learning<br/>• Python Integration<br/>• LLM Analytics<br/>• NLP]
         I[Visualization<br/>• ggplot2<br/>• plotly<br/>• Leaflet]
     end
 
-    subgraph "Domain Specific"
+    subgraph Domain["Domain Specific"]
         J[CDISC<br/>• SDTM<br/>• ADaM<br/>• Define-XML]
         K[Regulatory<br/>• GxP<br/>• 21 CFR Part 11<br/>• Validation]
         L[Pharmaceutical<br/>• Clinical Trials<br/>• Drug Development<br/>• Safety]
@@ -448,4 +446,4 @@ sequenceDiagram
     Interviewer->>You: Impressed!
 ```
 
-This comprehensive workflow documentation demonstrates your complete understanding of the Senior Shiny Developer position, from technical implementation to domain expertise, showing how all your portfolio projects integrate into the full clinical development lifecycle!
+This GitHub-compatible version fixes all Mermaid syntax issues and will render properly on GitHub!
