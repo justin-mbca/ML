@@ -149,18 +149,102 @@ ui <- dashboardPage(
       # Overview Tab
       tabItem(tabName = "overview",
         h2("Data Integration & Processing Hub"),
+        
+        fluidRow(
+          box(title = "📋 Application Overview", width = 12, status = "info", solidHeader = TRUE,
+              tags$div(style = "font-size: 15px;",
+                tags$p(tags$b("Purpose:"), "Comprehensive Shiny dashboard demonstrating data engineering, workflow automation, and AI integration capabilities for pharmaceutical data operations."),
+                tags$p(tags$b("Domain:"), "Pharmaceutical Data Engineering, Computational Science, AI/ML Integration"),
+                tags$p(tags$b("Technologies:"), "R/Shiny, SAS Migration, Pharmaverse (Admiral), HPC Infrastructure, LLM APIs"),
+                tags$p(tags$b("Note:"), "This application uses simulated data and mock LLM responses for demonstration. The LLM module includes production-ready integration architecture with placeholder functions—see 'LLM Setup Guide' tab for implementation details.")
+              )
+          )
+        ),
+        
         fluidRow(
           valueBoxOutput("totalProjects"),
           valueBoxOutput("migrationProgress"),
           valueBoxOutput("hpcUtilization")
         ),
+        
         fluidRow(
-          box(title = "Hub Components", width = 12, solidHeader = TRUE, status = "primary",
-              tags$ul(
-                tags$li(tags$b("SAS to R Migration:"), "Legacy SAS code migration and validation"),
-                tags$li(tags$b("Pharmaverse Integration:"), "Admiral package and CDISC ADaM datasets"),
-                tags$li(tags$b("HPC Dashboard:"), "High-performance computing cluster monitoring"),
-                tags$li(tags$b("LLM Analytics:"), "AI-powered clinical document analysis")
+          box(title = "Hub Components", width = 6, solidHeader = TRUE, status = "primary",
+              tags$ul(style = "font-size: 14px;",
+                tags$li(tags$b("SAS to R Migration:"), "Legacy code modernization tracking and efficiency analysis"),
+                tags$li(tags$b("Pharmaverse Integration:"), "Admiral package workflow for CDISC ADaM dataset generation"),
+                tags$li(tags$b("HPC Dashboard:"), "Multi-node cluster monitoring with resource utilization metrics"),
+                tags$li(tags$b("LLM Analytics:"), "AI-powered clinical document analysis (architecture-ready for GPT-4/Claude/Ollama)")
+              )
+          ),
+          box(title = "Technical Capabilities", width = 6, solidHeader = TRUE, status = "success",
+              tags$ul(style = "font-size: 14px;",
+                tags$li(tags$b("Data Pipeline Architecture:"), "End-to-end workflow from legacy systems to modern analytics"),
+                tags$li(tags$b("Code Migration Tracking:"), "Metrics-driven SAS-to-R conversion monitoring"),
+                tags$li(tags$b("CDISC ADaM Expertise:"), "ADSL, ADAE, ADLB, ADVS, ADTTE dataset structures"),
+                tags$li(tags$b("HPC Integration:"), "Understanding of cluster computing and resource optimization"),
+                tags$li(tags$b("LLM API Design:"), "RESTful API patterns for OpenAI, Anthropic, local models"),
+                tags$li(tags$b("Error Handling:"), "Robust try-catch blocks and fallback mechanisms")
+              )
+          )
+        ),
+        
+        fluidRow(
+          box(title = "Key Features Demonstrated", width = 12, solidHeader = TRUE, status = "warning",
+              tags$div(style = "font-size: 14px;",
+                tags$h4("1. SAS to R Migration Workflow"),
+                tags$ul(
+                  tags$li("Migration project tracking with status indicators (Completed/In Progress/Pending)"),
+                  tags$li("Code efficiency comparison: SAS vs R line counts"),
+                  tags$li("Validation status tracking for regulatory compliance"),
+                  tags$li("Demonstrates understanding of pharma's ongoing R adoption trend")
+                ),
+                tags$h4("2. Pharmaverse & CDISC ADaM Integration"),
+                tags$ul(
+                  tags$li("ADSL: Subject-Level Analysis Dataset (demographics, baseline)"),
+                  tags$li("ADAE: Adverse Events Analysis Dataset (safety monitoring)"),
+                  tags$li("ADLB: Laboratory Results Analysis Dataset (biomarkers)"),
+                  tags$li("ADVS: Vital Signs Analysis Dataset (physiological measures)"),
+                  tags$li("ADTTE: Time-to-Event Analysis Dataset (survival analysis)"),
+                  tags$li("Interactive charts showing record counts and variable distributions")
+                ),
+                tags$h4("3. HPC Cluster Monitoring"),
+                tags$ul(
+                  tags$li("8-node cluster metrics: CPU, Memory, GPU utilization"),
+                  tags$li("Job queue status and running job counts"),
+                  tags$li("Resource utilization heatmaps and trend analysis"),
+                  tags$li("Demonstrates scalability awareness for big data analytics")
+                ),
+                tags$h4("4. LLM Document Analytics (Architecture Demo)"),
+                tags$ul(
+                  tags$li("Placeholder functions for GPT-4, Claude, Ollama integration"),
+                  tags$li("Document sentiment analysis (Positive/Neutral/Negative)"),
+                  tags$li("Category classification (Protocol/CSR/SAP/ICF)"),
+                  tags$li("Production-ready code structure—just add API keys"),
+                  tags$li("Comprehensive setup guide with 4 integration options")
+                )
+              )
+          )
+        ),
+        
+        fluidRow(
+          box(title = "💡 For Interviewers", width = 12, status = "primary",
+              tags$div(style = "font-size: 14px;",
+                tags$p("This dashboard demonstrates:"),
+                tags$ul(
+                  tags$li(tags$b("Strategic Thinking:"), "Understanding pharma's transition from SAS to R and the business drivers"),
+                  tags$li(tags$b("Modern Data Stack:"), "Familiarity with Pharmaverse ecosystem (Admiral, Metacore, Metatools) for CDISC workflows"),
+                  tags$li(tags$b("Infrastructure Knowledge:"), "HPC cluster architecture, job scheduling, resource optimization"),
+                  tags$li(tags$b("AI/ML Integration:"), "Forward-thinking approach to LLM integration with production-grade architecture"),
+                  tags$li(tags$b("Full-Stack Capabilities:"), "From data engineering to UI/UX to API integration")
+                ),
+                tags$p(tags$b("LLM Module Status:"), "Currently using mock data (use_real_llm = FALSE). The architecture is complete—uncomment API call code in analyze_document_llm() and add API keys to activate. See 'LLM Setup Guide' tab for OpenAI, Anthropic, Ollama, and R package integration instructions."),
+                tags$p(tags$b("Real-World Application:"), "In production, this hub would orchestrate data flows between:"),
+                tags$ul(
+                  tags$li("Legacy SAS systems → R-based analytics pipelines"),
+                  tags$li("SDTM datasets → Admiral workflows → ADaM outputs → Statistical reports"),
+                  tags$li("HPC schedulers (Slurm/PBS) → Real-time monitoring dashboards"),
+                  tags$li("Clinical documents → LLM APIs → Structured insights → Regulatory submissions")
+                )
               )
           )
         )

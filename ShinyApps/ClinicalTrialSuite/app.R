@@ -134,18 +134,83 @@ ui <- dashboardPage(
       # Overview Tab
       tabItem(tabName = "overview",
         h2("Clinical Trial Management Suite"),
+        
+        fluidRow(
+          box(title = "📋 Application Overview", width = 12, status = "info", solidHeader = TRUE,
+              tags$div(style = "font-size: 15px;",
+                tags$p(tags$b("Purpose:"), "Integrated Shiny dashboard demonstrating pharmaceutical data science capabilities across clinical trial operations, regulatory compliance, and pharmacometric analysis."),
+                tags$p(tags$b("Domain:"), "Pharmaceutical R&D, Clinical Development, Regulatory Affairs"),
+                tags$p(tags$b("Data Standards:"), "CDISC SDTM (Study Data Tabulation Model) and CDISC ADaM (Analysis Data Model)"),
+                tags$p(tags$b("Note:"), "This application uses simulated data for portfolio demonstration. All data structures and analytical methods follow industry best practices and regulatory standards.")
+              )
+          )
+        ),
+        
         fluidRow(
           valueBoxOutput("totalSubjects"),
           valueBoxOutput("activeStudies"),
           valueBoxOutput("complianceRate")
         ),
+        
         fluidRow(
-          box(title = "Suite Components", width = 12, solidHeader = TRUE, status = "primary",
-              tags$ul(
-                tags$li(tags$b("Clinical Data Viewer:"), "CDISC SDTM/ADaM dataset visualization"),
-                tags$li(tags$b("PK/PD Analysis:"), "Pharmacokinetic modeling and simulation"),
-                tags$li(tags$b("Regulatory Tracking:"), "Submission pipeline management"),
-                tags$li(tags$b("GxP Compliance:"), "Quality and compliance monitoring")
+          box(title = "Suite Components", width = 6, solidHeader = TRUE, status = "primary",
+              tags$ul(style = "font-size: 14px;",
+                tags$li(tags$b("Clinical Data Viewer:"), "CDISC SDTM compliant data visualization and analysis"),
+                tags$li(tags$b("PK/PD Modeling:"), "Pharmacokinetic analysis with one-compartment model implementation"),
+                tags$li(tags$b("Regulatory Tracking:"), "eCTD submission module monitoring and progress tracking"),
+                tags$li(tags$b("GxP Compliance:"), "Quality system validation and audit trail management")
+              )
+          ),
+          box(title = "Technical Capabilities", width = 6, solidHeader = TRUE, status = "success",
+              tags$ul(style = "font-size: 14px;",
+                tags$li(tags$b("Reactive Programming:"), "Real-time data updates and interactive visualizations"),
+                tags$li(tags$b("CDISC Expertise:"), "Proper SDTM variable naming and domain relationships"),
+                tags$li(tags$b("Pharmacometrics:"), "Mathematical modeling of drug concentration-time profiles"),
+                tags$li(tags$b("Interactive Charts:"), "Plotly integration for dynamic, publication-ready graphics"),
+                tags$li(tags$b("Data Tables:"), "DT package with sorting, filtering, and pagination"),
+                tags$li(tags$b("Responsive Design:"), "shinydashboard layout optimized for various screen sizes")
+              )
+          )
+        ),
+        
+        fluidRow(
+          box(title = "Key Features Demonstrated", width = 12, solidHeader = TRUE, status = "warning",
+              tags$div(style = "font-size: 14px;",
+                tags$h4("1. Clinical Data Viewer"),
+                tags$ul(
+                  tags$li("SDTM Demographics (DM) and Vital Signs (VS) domains"),
+                  tags$li("Interactive data tables with 100 simulated subjects"),
+                  tags$li("Box plots showing vital sign distributions across visits"),
+                  tags$li("Treatment arm comparisons")
+                ),
+                tags$h4("2. PK/PD Modeling"),
+                tags$ul(
+                  tags$li("One-compartment model with first-order absorption: C(t) = (Dose × Ka)/(Vd × (Ka - Ke)) × (exp(-Ke × t) - exp(-Ka × t))"),
+                  tags$li("Calculated parameters: Cmax, Tmax, AUC, Clearance, Half-life"),
+                  tags$li("Allometric scaling based on patient weight"),
+                  tags$li("Interactive concentration-time curves for dose groups")
+                ),
+                tags$h4("3. Regulatory & Compliance"),
+                tags$ul(
+                  tags$li("eCTD Module 2-5 tracking (Clinical Overview, Clinical Summary, Clinical Study Reports, Nonclinical)"),
+                  tags$li("GxP compliance monitoring across LIMS, CTMS, EDC, eTMF systems"),
+                  tags$li("Audit trail tracking and validation status")
+                )
+              )
+          )
+        ),
+        
+        fluidRow(
+          box(title = "💡 For Interviewers", width = 12, status = "primary",
+              tags$div(style = "font-size: 14px;",
+                tags$p("This dashboard showcases:"),
+                tags$ul(
+                  tags$li(tags$b("Pharmaceutical Domain Knowledge:"), "Understanding of CDISC standards, PK/PD modeling, and regulatory requirements"),
+                  tags$li(tags$b("R Programming Excellence:"), "Advanced Shiny development with reactive programming, modular code structure, and efficient data handling"),
+                  tags$li(tags$b("Data Visualization:"), "Publication-quality interactive charts using ggplot2 and plotly"),
+                  tags$li(tags$b("Full-Stack Thinking:"), "Consideration of data flow from clinical databases to regulatory submissions")
+                ),
+                tags$p(tags$b("Real-World Application:"), "In production, this dashboard would connect to clinical trial databases (e.g., PostgreSQL, Oracle), integrate with EDC systems (Medidata Rave, Veeva Vault), and support real-time monitoring of ongoing trials.")
               )
           )
         )
