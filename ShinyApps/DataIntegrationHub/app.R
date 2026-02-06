@@ -15,6 +15,7 @@ library(ggplot2)
 
 # Generate SAS Migration Data
 generate_sas_data <- function() {
+  set.seed(123)
   data.frame(
     SAS_Program = c("dm_analysis.sas", "vs_tables.sas", "ae_summary.sas", "efficacy_plots.sas", "lab_shifts.sas"),
     R_Script = c("dm_analysis.R", "vs_tables.R", "ae_summary.R", "efficacy_plots.R", "lab_shifts.R"),
@@ -28,6 +29,7 @@ generate_sas_data <- function() {
 
 # Generate Pharmaverse Data
 generate_pharmaverse_data <- function() {
+  set.seed(456)
   data.frame(
     Dataset = c("ADSL", "ADAE", "ADLB", "ADVS", "ADTTE"),
     Package = c("admiral", "admiral", "admiral", "admiral", "admiral"),
@@ -40,6 +42,7 @@ generate_pharmaverse_data <- function() {
 
 # Generate HPC Metrics
 generate_hpc_data <- function() {
+  set.seed(789)
   data.frame(
     Node = paste0("node", 1:8),
     CPU_Usage = sample(30:90, 8),
@@ -84,6 +87,7 @@ analyze_document_llm <- function(document_text, api_key = NULL) {
   # return(result$choices[[1]]$message$content)
   
   # MOCK RESPONSE (remove when implementing real API)
+  set.seed(999)
   list(
     sentiment = sample(c("Positive", "Neutral", "Negative"), 1),
     key_terms = sample(5:20, 1),
@@ -135,7 +139,8 @@ ui <- dashboardPage(
       menuItem("Pharmaverse Integration", tabName = "pharmaverse", icon = icon("cubes")),
       menuItem("HPC Dashboard", tabName = "hpc", icon = icon("server")),
       menuItem("LLM Analytics", tabName = "llm", icon = icon("brain")),
-      menuItem("LLM Setup Guide", tabName = "llm_setup", icon = icon("book"))
+      menuItem("LLM Setup Guide", tabName = "llm_setup", icon = icon("book")),
+      menuItem("Simulated Data Info", tabName = "data_info", icon = icon("database"))
     )
   ),
   
@@ -369,6 +374,138 @@ lda_model <- LDA(dtm, k = 5)')
               )
           )
         )
+      ),
+      
+      # Data Info Tab
+      tabItem(tabName = "data_info",
+        h2("Simulated Data Methodology"),
+        
+        fluidRow(
+          box(title = "Purpose of Simulated Data", width = 12, status = "primary", solidHeader = TRUE,
+              p("This application uses simulated data for demonstration and portfolio purposes. All data generation uses", 
+                tags$code("set.seed()"), "to ensure consistent results across runs."),
+              p(tags$b("Why Simulated Data?"), "Allows demonstration of advanced analytics capabilities while maintaining data privacy and avoiding regulatory constraints.")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "SAS Migration Data", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'generate_sas_data <- function() {
+  set.seed(123)  # Ensures reproducibility
+  data.frame(
+    SAS_Program = c("dm_analysis.sas", "vs_tables.sas", ...),
+    R_Script = c("dm_analysis.R", "vs_tables.R", ...),
+    Status = sample(c("Completed", "In Progress", "Pending"), 5, replace = TRUE),
+    Lines_SAS = sample(100:500, 5),  # Realistic code lengths
+    Lines_R = sample(80:400, 5)      # R typically 20% shorter
+  )
+}'),
+              h4("How It Mimics Real Data:"),
+              tags$ul(
+                tags$li("Program names follow actual SAS/R naming conventions (dm_analysis, vs_tables)"),
+                tags$li("Line counts reflect realistic code complexity (100-500 lines)"),
+                tags$li("R code is typically 20% shorter than equivalent SAS (efficiency gain)"),
+                tags$li("Status tracking mirrors real migration project workflows")
+              ),
+              h4("Current Data:"),
+              DTOutput("dataInfoSAS")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "Pharmaverse ADaM Data", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'generate_pharmaverse_data <- function() {
+  set.seed(456)
+  data.frame(
+    Dataset = c("ADSL", "ADAE", "ADLB", "ADVS", "ADTTE"),  # Standard CDISC ADaM datasets
+    Package = c("admiral", "admiral", ...),
+    Records = sample(100:1000, 5),     # Typical trial sizes
+    Variables = sample(20:50, 5)       # Standard variable counts
+  )
+}'),
+              h4("How It Mimics Real Data:"),
+              tags$ul(
+                tags$li(tags$b("ADSL:"), "Subject-Level Analysis Dataset - baseline demographics"),
+                tags$li(tags$b("ADAE:"), "Adverse Events Analysis Dataset - safety monitoring"),
+                tags$li(tags$b("ADLB:"), "Laboratory Results Analysis Dataset - biomarkers"),
+                tags$li(tags$b("ADVS:"), "Vital Signs Analysis Dataset - physiological measures"),
+                tags$li(tags$b("ADTTE:"), "Time-to-Event Analysis Dataset - survival analysis"),
+                tags$li("Record counts (100-1000) match typical Phase II/III trial sizes"),
+                tags$li("Variable counts (20-50) align with CDISC ADaM standards")
+              ),
+              h4("Current Data:"),
+              DTOutput("dataInfoPharmaverse")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "HPC Cluster Metrics", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'generate_hpc_data <- function() {
+  set.seed(789)
+  data.frame(
+    Node = paste0("node", 1:8),
+    CPU_Usage = sample(30:90, 8),      # Realistic CPU loads
+    Memory_Usage = sample(40:85, 8),   # Realistic memory usage
+    GPU_Usage = sample(0:100, 8),      # Variable GPU utilization
+    Jobs_Running = sample(1:10, 8)     # Concurrent job counts
+  )
+}'),
+              h4("How It Mimics Real Data:"),
+              tags$ul(
+                tags$li("8-node cluster mimics typical pharma HPC infrastructure"),
+                tags$li("CPU usage (30-90%) reflects realistic workload patterns"),
+                tags$li("Memory usage (40-85%) avoids edge cases (too low/high)"),
+                tags$li("GPU usage variability shows mixed CPU/GPU workloads"),
+                tags$li("Jobs per node (1-10) matches real scheduler behavior")
+              ),
+              h4("Current Data:"),
+              DTOutput("dataInfoHPC")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "LLM Document Analysis", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'analyze_document_llm <- function(document_text, api_key = NULL) {
+  set.seed(999)
+  list(
+    sentiment = sample(c("Positive", "Neutral", "Negative"), 1),
+    key_terms = sample(5:20, 1),
+    category = sample(c("Protocol", "CSR", "SAP", "ICF"), 1)
+  )
+}'),
+              h4("How It Mimics Real Data:"),
+              tags$ul(
+                tags$li(tags$b("Document Categories:"), "Protocol, CSR (Clinical Study Report), SAP (Statistical Analysis Plan), ICF (Informed Consent)"),
+                tags$li(tags$b("Sentiment:"), "Positive/Neutral/Negative reflects document tone"),
+                tags$li(tags$b("Key Terms:"), "5-20 terms matches typical clinical document complexity"),
+                tags$li("Currently MOCK - no real LLM API calls"),
+                tags$li("Architecture ready for OpenAI, Anthropic, or Ollama integration")
+              ),
+              h4("Current Data:"),
+              DTOutput("dataInfoLLM")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "Converting to Real Data", width = 12, status = "success", solidHeader = TRUE,
+              h4("Steps to Use Production Data:"),
+              tags$ol(
+                tags$li(tags$b("SAS Migration:"), "Replace with read_excel('migration_tracker.xlsx')"),
+                tags$li(tags$b("Pharmaverse:"), "Use actual admiral package outputs from SDTM"),
+                tags$li(tags$b("HPC Metrics:"), "Connect via SSH to cluster and parse squeue/sinfo"),
+                tags$li(tags$b("LLM Analytics:"), "Add API keys and set use_real_llm = TRUE")
+              ),
+              p("The current data generation functions can be completely replaced with database queries, API calls, or file reads without changing any UI code.")
+          )
+        )
       )
     )
   )
@@ -536,6 +673,31 @@ server <- function(input, output, session) {
       theme_minimal()
     
     ggplotly(p)
+  })
+  
+  # Data Info Outputs
+  output$dataInfoSAS <- renderDT({
+    datatable(sas_data(), 
+              options = list(pageLength = 5, scrollX = TRUE),
+              caption = "Current SAS migration tracking data (reproducible with set.seed(123))")
+  })
+  
+  output$dataInfoPharmaverse <- renderDT({
+    datatable(pharmaverse_data(), 
+              options = list(pageLength = 5, scrollX = TRUE),
+              caption = "Current Pharmaverse ADaM datasets (reproducible with set.seed(456))")
+  })
+  
+  output$dataInfoHPC <- renderDT({
+    datatable(hpc_data(), 
+              options = list(pageLength = 8, scrollX = TRUE),
+              caption = "Current HPC cluster metrics (reproducible with set.seed(789))")
+  })
+  
+  output$dataInfoLLM <- renderDT({
+    datatable(llm_data(), 
+              options = list(pageLength = 10, scrollX = TRUE),
+              caption = "Current LLM document analysis results (reproducible with set.seed(999))")
   })
 }
 

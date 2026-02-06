@@ -124,7 +124,8 @@ ui <- dashboardPage(
       menuItem("Clinical Data Viewer", tabName = "clinical", icon = icon("table")),
       menuItem("PK/PD Analysis", tabName = "pkpd", icon = icon("line-chart")),
       menuItem("Regulatory Tracking", tabName = "regulatory", icon = icon("file-text")),
-      menuItem("GxP Compliance", tabName = "gxp", icon = icon("check-circle"))
+      menuItem("GxP Compliance", tabName = "gxp", icon = icon("check-circle")),
+      menuItem("Simulated Data Info", tabName = "data_info", icon = icon("database"))
     )
   ),
   
@@ -206,6 +207,127 @@ ui <- dashboardPage(
         fluidRow(
           box(title = "Compliance by System", width = 12,
               plotlyOutput("gxpPlot"))
+        )
+      ),
+      
+      # Data Info Tab
+      tabItem(tabName = "data_info",
+        h2("Simulated Data Methodology"),
+        
+        fluidRow(
+          box(title = "Purpose of Simulated Data", width = 12, status = "primary", solidHeader = TRUE,
+              p("This application demonstrates clinical trial management capabilities using simulated data. All data generation uses", 
+                tags$code("set.seed(123)"), "to ensure consistent, reproducible results."),
+              p(tags$b("Why Simulated Data?"), "Protects patient privacy, avoids regulatory constraints, and enables portfolio demonstration of pharmaceutical data science capabilities.")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "CDISC SDTM Demographics (DM) Data", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'generate_clinical_data <- function() {
+  set.seed(123)  # Ensures reproducibility
+  dm <- data.frame(
+    STUDYID = rep("STUDY001", 100),
+    SUBJID = paste0("SUBJ", sprintf("%03d", 1:100)),
+    AGE = sample(18:75, 100, replace = TRUE),
+    SEX = sample(c("M", "F"), 100, replace = TRUE),
+    RACE = sample(c("WHITE", "BLACK", "ASIAN", "HISPANIC"), 100, replace = TRUE),
+    ARM = sample(c("Placebo", "Drug A", "Drug B"), 100, replace = TRUE)
+  )
+}'),
+              h4("How It Mimics Real CDISC Data:"),
+              tags$ul(
+                tags$li(tags$b("Variable Names:"), "STUDYID, SUBJID, AGE, SEX, RACE, ARM follow CDISC SDTM naming conventions"),
+                tags$li(tags$b("Subject IDs:"), "SUBJ001-SUBJ100 format matches regulatory submissions"),
+                tags$li(tags$b("Age Range:"), "18-75 reflects typical Phase II/III trial inclusion criteria"),
+                tags$li(tags$b("Demographics:"), "Sex and race distributions simulate real trial populations"),
+                tags$li(tags$b("Treatment Arms:"), "3-arm design (Placebo + 2 doses) is common in clinical trials")
+              ),
+              h4("Current DM Data:"),
+              DTOutput("dataInfoDM")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "CDISC SDTM Vital Signs (VS) Data", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'vs <- data.frame(
+  SUBJID = sample(dm$SUBJID, 500, replace = TRUE),
+  VISIT = sample(c("Baseline", "Week 4", "Week 8"), 500, replace = TRUE),
+  VSTESTCD = rep(c("SYSBP", "DIABP", "PULSE", "TEMP", "WEIGHT"), 100),
+  VSORRES = c(
+    rnorm(100, 120, 15),  # Systolic BP: mean=120, sd=15
+    rnorm(100, 80, 10),   # Diastolic BP: mean=80, sd=10
+    rnorm(100, 72, 10),   # Pulse: mean=72, sd=10
+    rnorm(100, 98.6, 0.5), # Temperature: mean=98.6, sd=0.5
+    rnorm(100, 70, 10)    # Weight: mean=70kg, sd=10
+  )
+)'),
+              h4("How It Mimics Real Vital Signs:"),
+              tags$ul(
+                tags$li(tags$b("Test Codes:"), "SYSBP, DIABP, PULSE, TEMP, WEIGHT are standard CDISC VSTESTCD values"),
+                tags$li(tags$b("Visit Schedule:"), "Baseline/Week 4/Week 8 reflects typical trial timelines"),
+                tags$li(tags$b("Normal Distributions:"), "Uses rnorm() with physiologically realistic means and standard deviations"),
+                tags$li(tags$b("Systolic BP:"), "120 mmHg ± 15 matches population norms"),
+                tags$li(tags$b("Diastolic BP:"), "80 mmHg ± 10 matches population norms"),
+                tags$li(tags$b("Body Temperature:"), "98.6°F ± 0.5 is narrow as expected"),
+                tags$li(tags$b("Multiple Measures:"), "500 records across 100 subjects = ~5 measurements per subject")
+              ),
+              h4("Current VS Data:"),
+              DTOutput("dataInfoVS")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "Pharmacokinetic (PK) Data", width = 12, solidHeader = TRUE,
+              h4("Generation Method:"),
+              tags$pre(
+'generate_pk_data <- function() {
+  set.seed(123)
+  # One-compartment model with first-order absorption
+  ka <- 0.8   # Absorption rate constant (1/hr)
+  ke <- 0.1   # Elimination rate constant (1/hr)
+  vd <- 50    # Volume of distribution (L)
+  
+  # Time-concentration curve
+  C(t) = (Dose × Ka) / (Vd × (Ka - Ke)) × (exp(-Ke × t) - exp(-Ka × t))
+  
+  # PK Parameters:
+  # - Cmax: Maximum concentration
+  # - Tmax: Time to maximum concentration  
+  # - AUC: Area under curve (trapezoidal rule)
+  # - Clearance (CL): Dose / AUC
+  # - Half-life (t½): 0.693 / Ke
+}'),
+              h4("How It Mimics Real PK Data:"),
+              tags$ul(
+                tags$li(tags$b("One-Compartment Model:"), "Standard pharmacokinetic equation used in drug development"),
+                tags$li(tags$b("Dose Levels:"), "50/100/200 mg represent Low/Medium/High dose escalation"),
+                tags$li(tags$b("Time Points:"), "0, 0.5, 1, 2, 4, 6, 8, 12, 24 hours match real PK sampling schedules"),
+                tags$li(tags$b("Parameter Values:"), "Ka=0.8, Ke=0.1, Vd=50L are realistic for oral medications"),
+                tags$li(tags$b("Allometric Scaling:"), "Adjusts Vd based on patient weight (real covariate effect)"),
+                tags$li(tags$b("Inter-subject Variability:"), "Random noise simulates biological variability")
+              ),
+              h4("Current PK Data:"),
+              DTOutput("dataInfoPK")
+          )
+        ),
+        
+        fluidRow(
+          box(title = "Converting to Real Data", width = 12, status = "success", solidHeader = TRUE,
+              h4("Steps to Use Production Clinical Data:"),
+              tags$ol(
+                tags$li(tags$b("CDISC Datasets:"), "Replace with read_sas('dm.sas7bdat') or database query"),
+                tags$li(tags$b("Database Connection:"), tags$code("con <- dbConnect(RPostgres::Postgres(), dbname='clinical_trials')")),
+                tags$li(tags$b("Data Validation:"), "Add checks for CDISC compliance and data quality"),
+                tags$li(tags$b("Real PK Data:"), "Import from Phoenix WinNonlin or NONMEM output"),
+                tags$li(tags$b("Regulatory Submission:"), "Connect to eCTD tracking systems")
+              ),
+              p("The Shiny UI and analysis code remain unchanged - only the data source functions need updating.")
+          )
         )
       )
     )
@@ -382,6 +504,25 @@ server <- function(input, output, session) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
     ggplotly(p)
+  })
+  
+  # Data Info Outputs
+  output$dataInfoDM <- renderDT({
+    datatable(clinical_data()$dm, 
+              options = list(pageLength = 10, scrollX = TRUE),
+              caption = "CDISC SDTM Demographics Domain (reproducible with set.seed(123))")
+  })
+  
+  output$dataInfoVS <- renderDT({
+    datatable(clinical_data()$vs, 
+              options = list(pageLength = 10, scrollX = TRUE),
+              caption = "CDISC SDTM Vital Signs Domain (reproducible with set.seed(123))")
+  })
+  
+  output$dataInfoPK <- renderDT({
+    datatable(pk_data(), 
+              options = list(pageLength = 10, scrollX = TRUE),
+              caption = "Pharmacokinetic concentration-time data (reproducible with set.seed(123))")
   })
 }
 
