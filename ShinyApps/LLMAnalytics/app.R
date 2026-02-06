@@ -21,7 +21,17 @@ library(rmarkdown)
 # Python integration setup
 setup_python_environment <- function() {
   # Initialize reticulate for Python integration
-  use_python("/usr/bin/python3", required = FALSE)
+  # Use find_python() instead of hardcoded path for better portability
+  tryCatch({
+    reticulate::use_python(reticulate::conda_python(), required = FALSE)
+  }, error = function(e) {
+    # Fall back to system python if conda not available
+    tryCatch({
+      reticulate::use_python(Sys.which("python3"), required = FALSE)
+    }, error = function(e2) {
+      warning("Python not available for LLM functionality")
+    })
+  })
   
   # Import Python modules (if available)
   tryCatch({

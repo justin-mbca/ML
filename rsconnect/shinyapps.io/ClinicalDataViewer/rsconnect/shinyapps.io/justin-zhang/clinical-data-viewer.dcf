@@ -1,0 +1,10 @@
+name: clinical-data-viewer
+title:
+username: justin-zhang
+account: justin-zhang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16610427
+bundleId: 11544616
+url: https://justin-zhang.shinyapps.io/clinical-data-viewer/
+version: 1

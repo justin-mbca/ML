@@ -1,0 +1,894 @@
+# Pharmacometric Modeling Dashboard
+# Senior Shiny Developer Portfolio Project
+# Demonstrates PK/PD modeling and simulation capabilities
+
+library(shiny)
+library(shinydashboard)
+library(plotly)
+library(DT)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(shinycssloaders)
+library(shinyWidgets)
+library(deSolve)
+library(nlme)
+library(gridExtra)
+library(scales)
+
+# Pharmacokinetic/Pharmacodynamic Model Functions
+pk_model <- function(t, dose, ka, ke, vd) {
+  # One-compartment model with first-order absorption
+  c <- (dose * ka) / (vd * (ka - ke)) * (exp(-ke * t) - exp(-ka * t))
+  return(c)
+}
+
+pkpd_model <- function(t, params) {
+  # PK/PD indirect response model
+  ka <- params$ka
+  ke <- params$ke
+  vd <- params$vd
+  emax <- params$emax
+  ec50 <- params$ec50
+  kin <- params$kin
+  kout <- params$kout
+  
+  # PK component
+  cp <- pk_model(t, params$dose, ka, ke, vd)
+  
+  # PD component (indirect response model)
+  effect <- (kin * emax * cp) / (ec50 + cp) / kout
+  
+  return(list(concentration = cp, effect = effect))
+}
+
+# Generate simulated clinical trial data
+generate_pkpd_data <- function() {
+  # Subject characteristics
+  n_subj <- 50
+  subjects <- data.frame(
+    SUBJID = paste0("SUBJ", sprintf("%03d", 1:n_subj)),
+    WEIGHT = rnorm(n_subj, 70, 10),
+    AGE = rnorm(n_subj, 45, 12),
+    SEX = sample(c("M", "F"), n_subj, replace = TRUE),
+    CRCL = rnorm(n_subj, 90, 20),
+    ARM = sample(c("Low Dose", "Medium Dose", "High Dose", "Placebo"), n_subj, replace = TRUE)
+  )
+  
+  # Dosing regimen
+  dose_map <- c("Placebo" = 0, "Low Dose" = 50, "Medium Dose" = 100, "High Dose" = 200)
+  subjects$DOSE <- dose_map[subjects$ARM]
+  
+  # PK parameters (allometric scaling)
+  subjects$CL <- 2.5 * (subjects$WEIGHT/70)^0.75 * (subjects$CRCL/90)^0.5
+  subjects$Vd <- 50 * (subjects$WEIGHT/70)
+  subjects$Ka <- rnorm(n_subj, 0.8, 0.2)
+  subjects$Ke <- subjects$CL / subjects$Vd
+  
+  # PD parameters
+  subjects$Emax <- rnorm(n_subj, 100, 15)
+  subjects$EC50 <- rnorm(n_subj, 50, 10)
+  subjects$Kin <- rnorm(n_subj, 10, 2)
+  subjects$Kout <- rnorm(n_subj, 1, 0.2)
+  
+  # Time points
+  time_points <- c(0, 0.5, 1, 2, 4, 6, 8, 12, 24, 48, 72, 168)
+  
+  # Generate concentration and effect data
+  pk_data <- data.frame()
+  pd_data <- data.frame()
+  
+  for(i in 1:n_subj) {
+    subj <- subjects[i, ]
+    
+    for(t in time_points) {
+      # PK simulation
+      conc <- pk_model(t, subj$DOSE, subj$Ka, subj$Ke, subj$Vd)
+      
+      # Add measurement error
+      conc_obs <- conc * (1 + rnorm(1, 0, 0.1))
+      
+      pk_data <- rbind(pk_data, data.frame(
+        SUBJID = subj$SUBJID,
+        TIME = t,
+        CONC = conc_obs,
+        CONC_PRED = conc,
+        DOSE = subj$DOSE,
+        ARM = subj$ARM,
+        WEIGHT = subj$WEIGHT,
+        CL = subj$CL,
+        Vd = subj$Vd
+      ))
+      
+      # PD simulation
+      pd_result <- pkpd_model(t, list(
+        dose = subj$DOSE,
+        ka = subj$Ka,
+        ke = subj$Ke,
+        vd = subj$Vd,
+        emax = subj$Emax,
+        ec50 = subj$EC50,
+        kin = subj$Kin,
+        kout = subj$Kout
+      ))
+      
+      # Add measurement error
+      effect_obs <- pd_result$effect * (1 + rnorm(1, 0, 0.15))
+      
+      pd_data <- rbind(pd_data, data.frame(
+        SUBJID = subj$SUBJID,
+        TIME = t,
+        EFFECT = effect_obs,
+        EFFECT_PRED = pd_result$effect,
+        CONC = conc,
+        DOSE = subj$DOSE,
+        ARM = subj$ARM,
+        Emax = subj$Emax,
+        EC50 = subj$EC50
+      ))
+    }
+  }
+  
+  list(subjects = subjects, pk_data = pk_data, pd_data = pd_data)
+}
+
+# Population PK analysis
+pop_pk_analysis <- function(pk_data) {
+  # Simplified population PK analysis
+  # In real implementation, this would use nlme or NONMEM
+  
+  # Calculate summary statistics by dose group
+  pk_summary <- pk_data %>%
+    filter(TIME > 0, CONC > 0) %>%
+    group_by(ARM, TIME) %>%
+    summarise(
+      n = n(),
+      mean_conc = mean(CONC),
+      sd_conc = sd(CONC),
+      cv = sd_conc / mean_conc * 100,
+      median_conc = median(CONC),
+      q25 = quantile(CONC, 0.25),
+      q75 = quantile(CONC, 0.75),
+      .groups = "drop"
+    )
+  
+  return(pk_summary)
+}
+
+# UI
+ui <- dashboardPage(
+  dashboardHeader(
+    title = "PharmacoModel Dashboard",
+    titleWidth = 300
+  ),
+  
+  dashboardSidebar(
+    width = 250,
+    sidebarMenu(
+      menuItem("Overview", tabName = "overview", icon = icon("dashboard")),
+      menuItem("PK Analysis", tabName = "pk", icon = icon("line-chart")),
+      menuItem("PD Analysis", tabName = "pd", icon = icon("area-chart")),
+      menuItem("PK/PD Modeling", tabName = "pkpd", icon = icon("cogs")),
+      menuItem("Simulation", tabName = "simulation", icon = icon("flask")),
+      menuItem("Covariates", tabName = "covariates", icon = icon("users")),
+      menuItem("Export", tabName = "export", icon = icon("download")),
+      menuItem("Documentation", tabName = "docs", icon = icon("book"))
+    )
+  ),
+  
+  dashboardBody(
+    tabItems(
+      # Overview Tab
+      tabItem(tabName = "overview",
+        fluidRow(
+          box(
+            title = "Study Summary", status = "primary", solidHeader = TRUE,
+            width = 12,
+            fluidRow(
+              column(3, valueBoxOutput("totalSubjects")),
+              column(3, valueBoxOutput("doseGroups")),
+              column(3, valueBoxOutput("totalSamples")),
+              column(3, valueBoxOutput("studyDuration"))
+            )
+          )
+        ),
+        fluidRow(
+          box(
+            title = "Study Design Overview", status = "info", solidHeader = TRUE,
+            width = 12,
+            plotOutput("studyDesignPlot", height = "400px")
+          )
+        )
+      ),
+      
+      # PK Analysis Tab
+      tabItem(tabName = "pk",
+        fluidRow(
+          box(
+            title = "Concentration-Time Profiles", status = "primary", solidHeader = TRUE,
+            width = 12,
+            selectInput("pkArm", "Select Treatment Arm:", 
+                       choices = c("All", "Low Dose", "Medium Dose", "High Dose", "Placebo")),
+            checkboxInput("showSpaghetti", "Show Individual Profiles", FALSE),
+            plotOutput("pkPlot", height = "500px")
+          )
+        ),
+        fluidRow(
+          box(
+            title = "PK Parameters Summary", status = "info", solidHeader = TRUE,
+            width = 6,
+            DT::dataTableOutput("pkParamsTable")
+          ),
+          box(
+            title = "Dose Proportionality", status = "info", solidHeader = TRUE,
+            width = 6,
+            plotOutput("dosePropPlot")
+          )
+        )
+      ),
+      
+      # PD Analysis Tab
+      tabItem(tabName = "pd",
+        fluidRow(
+          box(
+            title = "Effect-Time Profiles", status = "primary", solidHeader = TRUE,
+            width = 12,
+            selectInput("pdArm", "Select Treatment Arm:", 
+                       choices = c("All", "Low Dose", "Medium Dose", "High Dose", "Placebo")),
+            plotOutput("pdPlot", height = "500px")
+          )
+        ),
+        fluidRow(
+          box(
+            title = "Exposure-Response Relationship", status = "info", solidHeader = TRUE,
+            width = 12,
+            plotOutput("expResponsePlot", height = "400px")
+          )
+        )
+      ),
+      
+      # PK/PD Modeling Tab
+      tabItem(tabName = "pkpd",
+        fluidRow(
+          box(
+            title = "PK/PD Model Fit", status = "primary", solidHeader = TRUE,
+            width = 12,
+            selectInput("modelSubject", "Select Subject:", choices = NULL),
+            plotOutput("pkpdFitPlot", height = "500px")
+          )
+        ),
+        fluidRow(
+          box(
+            title = "Model Parameters", status = "info", solidHeader = TRUE,
+            width = 6,
+            DT::dataTableOutput("modelParamsTable")
+          ),
+          box(
+            title = "Goodness of Fit", status = "info", solidHeader = TRUE,
+            width = 6,
+            plotOutput("gofPlot")
+          )
+        )
+      ),
+      
+      # Simulation Tab
+      tabItem(tabName = "simulation",
+        fluidRow(
+          box(
+            title = "Dose Regimen Simulation", status = "primary", solidHeader = TRUE,
+            width = 12,
+            column(4,
+              sliderInput("simDose", "Dose (mg):", min = 25, max = 500, value = 100),
+              sliderInput("simInterval", "Dosing Interval (hours):", min = 6, max = 48, value = 24),
+              sliderInput("simDuration", "Duration (days):", min = 1, max = 30, value = 7)
+            ),
+            column(8,
+              plotOutput("simulationPlot", height = "400px")
+            )
+          )
+        ),
+        fluidRow(
+          box(
+            title = "Monte Carlo Simulation", status = "info", solidHeader = TRUE,
+            width = 12,
+            numericInput("mcSims", "Number of Simulations:", value = 1000, min = 100, max = 10000),
+            actionButton("runMC", "Run Monte Carlo Simulation", class = "btn-primary"),
+            plotOutput("mcPlot", height = "400px")
+          )
+        )
+      ),
+      
+      # Covariates Tab
+      tabItem(tabName = "covariates",
+        fluidRow(
+          box(
+            title = "Covariate Analysis", status = "primary", solidHeader = TRUE,
+            width = 12,
+            selectInput("covariate", "Select Covariate:", 
+                       choices = c("Weight", "Age", "Sex", "Creatinine Clearance")),
+            plotOutput("covariatePlot", height = "400px")
+          )
+        ),
+        fluidRow(
+          box(
+            title = "Covariate Effects on PK Parameters", status = "info", solidHeader = TRUE,
+            width = 6,
+            plotOutput("covCLPlot")
+          ),
+          box(
+            title = "Subgroup Analysis", status = "info", solidHeader = TRUE,
+            width = 6,
+            plotOutput("subgroupPlot")
+          )
+        )
+      ),
+      
+      # Export Tab
+      tabItem(tabName = "export",
+        fluidRow(
+          box(
+            title = "Export Results", status = "success", solidHeader = TRUE,
+            width = 12,
+            p("Export analysis results for regulatory submission and publication."),
+            selectInput("exportType", "Export Type:", 
+                       choices = c("PK Parameters", "PD Parameters", "Model Results", "Simulation Results")),
+            downloadButton("exportData", "Download CSV"),
+            downloadButton("exportReport", "Generate Report"),
+            downloadButton("exportFigures", "Export Figures")
+          )
+        )
+      ),
+      
+      # Documentation Tab
+      tabItem(tabName = "docs",
+        fluidRow(
+          box(
+            title = "Model Documentation", status = "info", solidHeader = TRUE,
+            width = 12,
+            includeMarkdown("model_docs.md")
+          )
+        )
+      )
+    )
+  )
+)
+
+# Server
+server <- function(input, output, session) {
+  
+  # Generate data
+  study_data <- reactiveVal(generate_pkpd_data())
+  
+  # Update subject selection
+  observe({
+    subjects <- study_data()$subjects$SUBJID
+    updateSelectInput(session, "modelSubject", choices = subjects, selected = subjects[1])
+  })
+  
+  # Overview outputs
+  output$totalSubjects <- renderValueBox({
+    valueBox(
+      value = nrow(study_data()$subjects),
+      subtitle = "Total Subjects",
+      icon = icon("users"),
+      color = "blue"
+    )
+  })
+  
+  output$doseGroups <- renderValueBox({
+    valueBox(
+      value = length(unique(study_data()$subjects$ARM)),
+      subtitle = "Dose Groups",
+      icon = icon("flask"),
+      color = "green"
+    )
+  })
+  
+  output$totalSamples <- renderValueBox({
+    valueBox(
+      value = nrow(study_data()$pk_data),
+      subtitle = "Total PK Samples",
+      icon = icon("vial"),
+      color = "yellow"
+    )
+  })
+  
+  output$studyDuration <- renderValueBox({
+    valueBox(
+      value = "24 weeks",
+      subtitle = "Study Duration",
+      icon = icon("calendar"),
+      color = "purple"
+    )
+  })
+  
+  # Study design plot
+  output$studyDesignPlot <- renderPlot({
+    subjects <- study_data()$subjects
+    ggplot(subjects, aes(x = ARM, fill = ARM)) +
+      geom_bar() +
+      labs(title = "Subject Distribution by Treatment Arm",
+           x = "Treatment Arm", y = "Number of Subjects") +
+      theme_minimal() +
+      theme(legend.position = "none")
+  })
+  
+  # PK concentration-time plot
+  output$pkPlot <- renderPlot({
+    pk_data <- study_data()$pk_data
+    
+    if(input$pkArm != "All") {
+      pk_data <- pk_data %>% filter(ARM == input$pkArm)
+    }
+    
+    if(input$showSpaghetti) {
+      # Individual profiles
+      ggplot(pk_data, aes(x = TIME, y = CONC, group = SUBJID, color = ARM)) +
+        geom_line(alpha = 0.3) +
+        stat_summary(fun = mean, geom = "line", size = 1.5) +
+        stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+        scale_y_log10() +
+        labs(title = "Concentration-Time Profiles",
+             x = "Time (hours)", y = "Concentration (ng/mL)") +
+        theme_minimal()
+    } else {
+      # Mean profiles only
+      pk_summary <- pk_data %>%
+        group_by(ARM, TIME) %>%
+        summarise(
+          mean_conc = mean(CONC),
+          sd_conc = sd(CONC),
+          n = n(),
+          .groups = "drop"
+        )
+      
+      ggplot(pk_summary, aes(x = TIME, y = mean_conc, color = ARM)) +
+        geom_line(size = 1.5) +
+        geom_ribbon(aes(ymin = mean_conc - sd_conc, ymax = mean_conc + sd_conc, fill = ARM), alpha = 0.2) +
+        scale_y_log10() +
+        labs(title = "Mean Concentration-Time Profiles",
+             x = "Time (hours)", y = "Concentration (ng/mL)") +
+        theme_minimal()
+    }
+  })
+  
+  # PK parameters table
+  output$pkParamsTable <- DT::renderDataTable({
+    pk_data <- study_data()$pk_data
+    subjects <- study_data()$subjects
+    
+    # Calculate PK parameters for each subject
+    pk_params <- pk_data %>%
+      filter(TIME > 0, CONC > 0) %>%
+      group_by(SUBJID) %>%
+      summarise(
+        Cmax = max(CONC),
+        Tmax = TIME[which.max(CONC)],
+        AUC = sum(CONC * diff(c(0, TIME))),  # Trapezoidal rule
+        CL = subjects$CL[match(SUBJID, subjects$SUBJID)][1],
+        Vd = subjects$Vd[match(SUBJID, subjects$SUBJID)][1],
+        Half_life = log(2) / subjects$Ke[match(SUBJID, subjects$SUBJID)][1],
+        .groups = "drop"
+      )
+    
+    DT::datatable(pk_params, options = list(pageLength = 10))
+  })
+  
+  # Dose proportionality plot
+  output$dosePropPlot <- renderPlot({
+    pk_data <- study_data()$pk_data
+    subjects <- study_data()$subjects
+    
+    # Calculate Cmax and AUC by dose
+    dose_response <- pk_data %>%
+      filter(DOSE > 0) %>%
+      group_by(SUBJID) %>%
+      summarise(
+        Cmax = max(CONC),
+        AUC = sum(CONC * diff(c(0, TIME))),
+        DOSE = first(DOSE),
+        .groups = "drop"
+      )
+    
+    # Dose proportionality plots
+    p1 <- ggplot(dose_response, aes(x = DOSE, y = Cmax)) +
+      geom_point() +
+      geom_smooth(method = "lm", se = TRUE) +
+      labs(title = "Dose Proportionality - Cmax",
+           x = "Dose (mg)", y = "Cmax (ng/mL)") +
+      theme_minimal()
+    
+    p2 <- ggplot(dose_response, aes(x = DOSE, y = AUC)) +
+      geom_point() +
+      geom_smooth(method = "lm", se = TRUE) +
+      labs(title = "Dose Proportionality - AUC",
+           x = "Dose (mg)", y = "AUC (ng*h/mL)") +
+      theme_minimal()
+    
+    grid.arrange(p1, p2, ncol = 2)
+  })
+  
+  # PD effect-time plot
+  output$pdPlot <- renderPlot({
+    pd_data <- study_data()$pd_data
+    
+    if(input$pdArm != "All") {
+      pd_data <- pd_data %>% filter(ARM == input$pdArm)
+    }
+    
+    pd_summary <- pd_data %>%
+      group_by(ARM, TIME) %>%
+      summarise(
+        mean_effect = mean(EFFECT),
+        sd_effect = sd(EFFECT),
+        n = n(),
+        .groups = "drop"
+      )
+    
+    ggplot(pd_summary, aes(x = TIME, y = mean_effect, color = ARM)) +
+      geom_line(size = 1.5) +
+      geom_ribbon(aes(ymin = mean_effect - sd_effect, ymax = mean_effect + sd_effect, fill = ARM), alpha = 0.2) +
+      labs(title = "Effect-Time Profiles",
+           x = "Time (hours)", y = "Pharmacodynamic Effect") +
+      theme_minimal()
+  })
+  
+  # Exposure-response plot
+  output$expResponsePlot <- renderPlot({
+    pd_data <- study_data()$pd_data
+    
+    # Create exposure-response relationship
+    exp_resp <- pd_data %>%
+      filter(TIME > 0, CONC > 0) %>%
+      group_by(SUBJID) %>%
+      summarise(
+        Cavg = mean(CONC),
+        Emax_effect = max(EFFECT),
+        ARM = first(ARM),
+        .groups = "drop"
+      )
+    
+    ggplot(exp_resp, aes(x = Cavg, y = Emax_effect, color = ARM)) +
+      geom_point(size = 3) +
+      geom_smooth(method = "loess", se = TRUE) +
+      labs(title = "Exposure-Response Relationship",
+           x = "Average Concentration (ng/mL)", y = "Maximum Effect") +
+      theme_minimal()
+  })
+  
+  # PK/PD model fit plot
+  output$pkpdFitPlot <- renderPlot({
+    pk_data <- study_data()$pk_data
+    pd_data <- study_data()$pd_data
+    
+    subj_id <- input$modelSubject
+    
+    pk_subj <- pk_data %>% filter(SUBJID == subj_id)
+    pd_subj <- pd_data %>% filter(SUBJID == subj_id)
+    
+    # Combine PK and PD data
+    combined <- pk_subj %>%
+      select(SUBJID, TIME, CONC, CONC_PRED, ARM) %>%
+      left_join(pd_subj %>% select(SUBJID, TIME, EFFECT, EFFECT_PRED), by = c("SUBJID", "TIME"))
+    
+    # Create dual-axis plot
+    p1 <- ggplot(combined, aes(x = TIME)) +
+      geom_point(aes(y = CONC, color = "Observed PK")) +
+      geom_line(aes(y = CONC_PRED, color = "Predicted PK")) +
+      scale_y_continuous(name = "Concentration (ng/mL)") +
+      labs(title = paste("PK/PD Model Fit -", subj_id)) +
+      theme_minimal()
+    
+    # Add PD on secondary axis
+    p2 <- ggplot(combined, aes(x = TIME)) +
+      geom_point(aes(y = EFFECT, color = "Observed PD")) +
+      geom_line(aes(y = EFFECT_PRED, color = "Predicted PD")) +
+      scale_y_continuous(name = "PD Effect") +
+      theme_minimal()
+    
+    grid.arrange(p1, p2, ncol = 1)
+  })
+  
+  # Model parameters table
+  output$modelParamsTable <- DT::renderDataTable({
+    subjects <- study_data()$subjects
+    subj_id <- input$modelSubject
+    
+    subj_params <- subjects %>% filter(SUBJID == subj_id) %>%
+      select(SUBJID, WEIGHT, AGE, SEX, CRCL, CL, Vd, Ka, Ke, Emax, EC50, Kin, Kout)
+    
+    DT::datatable(subj_params, options = list(pageLength = 1))
+  })
+  
+  # Goodness of fit plot
+  output$gofPlot <- renderPlot({
+    pk_data <- study_data()$pk_data
+    pd_data <- study_data()$pd_data
+    
+    # PK goodness of fit
+    pk_gof <- pk_data %>%
+      filter(CONC > 0) %>%
+      mutate(residual = CONC - CONC_PRED,
+             pred_ratio = CONC / CONC_PRED)
+    
+    p1 <- ggplot(pk_gof, aes(x = CONC_PRED, y = CONC)) +
+      geom_point(alpha = 0.6) +
+      geom_abline(slope = 1, intercept = 0, color = "red", size = 1) +
+      labs(title = "PK Goodness of Fit",
+           x = "Predicted Concentration", y = "Observed Concentration") +
+      theme_minimal()
+    
+    p2 <- ggplot(pk_gof, aes(x = CONC_PRED, y = residual)) +
+      geom_point(alpha = 0.6) +
+      geom_hline(yintercept = 0, color = "red", size = 1) +
+      labs(title = "PK Residuals",
+           x = "Predicted Concentration", y = "Residual") +
+      theme_minimal()
+    
+    grid.arrange(p1, p2, ncol = 2)
+  })
+  
+  # Simulation plot
+  output$simulationPlot <- renderPlot({
+    dose <- input$simDose
+    interval <- input$simInterval
+    duration <- input$simDuration
+    
+    # Simulate multiple doses
+    time_seq <- seq(0, duration * 24, by = 1)
+    conc_sim <- numeric(length(time_seq))
+    
+    # Subject parameters (average)
+    ka <- 0.8
+    ke <- 0.05
+    vd <- 50
+    
+    # Calculate concentration for each time point
+    for(i in seq_along(time_seq)) {
+      t <- time_seq[i]
+      
+      # Sum contributions from all doses
+      total_conc <- 0
+      n_doses <- floor(t / interval) + 1
+      
+      for(dose_num in 0:(n_doses-1)) {
+        dose_time <- dose_num * interval
+        if(t >= dose_time) {
+          total_conc <- total_conc + pk_model(t - dose_time, dose, ka, ke, vd)
+        }
+      }
+      
+      conc_sim[i] <- total_conc
+    }
+    
+    sim_data <- data.frame(Time = time_seq, Concentration = conc_sim)
+    
+    ggplot(sim_data, aes(x = Time, y = Concentration)) +
+      geom_line(size = 1.5) +
+      geom_vline(xintercept = seq(0, duration * 24, by = interval), linetype = "dashed", alpha = 0.5) +
+      scale_y_log10() +
+      labs(title = "Multiple-Dose Simulation",
+           x = "Time (hours)", y = "Concentration (ng/mL)") +
+      theme_minimal()
+  })
+  
+  # Monte Carlo simulation
+  output$mcPlot <- renderPlot({
+    if(input$runMC == 0) return(NULL)
+    
+    n_sims <- input$mcSims
+    dose <- input$simDose
+    
+    # Parameter variability
+    ka_var <- rlnorm(n_sims, log(0.8), 0.3)
+    ke_var <- rlnorm(n_sims, log(0.05), 0.3)
+    vd_var <- rlnorm(n_sims, log(50), 0.2)
+    
+    # Simulate Cmax and AUC for each subject
+    cmax_sim <- numeric(n_sims)
+    auc_sim <- numeric(n_sims)
+    
+    time_points <- seq(0, 24, by = 0.5)
+    
+    for(i in 1:n_sims) {
+      conc_profile <- pk_model(time_points, dose, ka_var[i], ke_var[i], vd_var[i])
+      cmax_sim[i] <- max(conc_profile)
+      auc_sim[i] <- sum(conc_profile * diff(c(0, time_points)))
+    }
+    
+    # Create histograms
+    p1 <- ggplot(data.frame(Cmax = cmax_sim), aes(x = Cmax)) +
+      geom_histogram(fill = "blue", alpha = 0.7, bins = 30) +
+      labs(title = "Monte Carlo Simulation - Cmax Distribution",
+           x = "Cmax (ng/mL)", y = "Frequency") +
+      theme_minimal()
+    
+    p2 <- ggplot(data.frame(AUC = auc_sim), aes(x = AUC)) +
+      geom_histogram(fill = "red", alpha = 0.7, bins = 30) +
+      labs(title = "Monte Carlo Simulation - AUC Distribution",
+           x = "AUC (ng*h/mL)", y = "Frequency") +
+      theme_minimal()
+    
+    grid.arrange(p1, p2, ncol = 2)
+  })
+  
+  # Covariate analysis
+  output$covariatePlot <- renderPlot({
+    subjects <- study_data()$subjects
+    pk_data <- study_data()$pk_data
+    
+    # Calculate PK parameters by subject
+    pk_params <- pk_data %>%
+      filter(TIME > 0, CONC > 0) %>%
+      group_by(SUBJID) %>%
+      summarise(Cmax = max(CONC), .groups = "drop")
+    
+    cov_data <- subjects %>%
+      select(SUBJID, WEIGHT, AGE, SEX, CRCL) %>%
+      left_join(pk_params, by = "SUBJID")
+    
+    if(input$covariate == "Weight") {
+      ggplot(cov_data, aes(x = WEIGHT, y = Cmax)) +
+        geom_point() +
+        geom_smooth(method = "lm", se = TRUE) +
+        labs(title = "Covariate Analysis: Weight vs Cmax",
+             x = "Weight (kg)", y = "Cmax (ng/mL)") +
+        theme_minimal()
+    } else if(input$covariate == "Age") {
+      ggplot(cov_data, aes(x = AGE, y = Cmax)) +
+        geom_point() +
+        geom_smooth(method = "lm", se = TRUE) +
+        labs(title = "Covariate Analysis: Age vs Cmax",
+             x = "Age (years)", y = "Cmax (ng/mL)") +
+        theme_minimal()
+    } else if(input$covariate == "Sex") {
+      ggplot(cov_data, aes(x = SEX, y = Cmax, fill = SEX)) +
+        geom_boxplot() +
+        labs(title = "Covariate Analysis: Sex vs Cmax",
+             x = "Sex", y = "Cmax (ng/mL)") +
+        theme_minimal() +
+        theme(legend.position = "none")
+    } else if(input$covariate == "Creatinine Clearance") {
+      ggplot(cov_data, aes(x = CRCL, y = Cmax)) +
+        geom_point() +
+        geom_smooth(method = "lm", se = TRUE) +
+        labs(title = "Covariate Analysis: Creatinine Clearance vs Cmax",
+             x = "CrCl (mL/min)", y = "Cmax (ng/mL)") +
+        theme_minimal()
+    }
+  })
+  
+  # Covariate effects on CL
+  output$covCLPlot <- renderPlot({
+    subjects <- study_data()$subjects
+    
+    p1 <- ggplot(subjects, aes(x = WEIGHT, y = CL)) +
+      geom_point() +
+      geom_smooth(method = "lm", se = TRUE) +
+      labs(title = "Weight vs Clearance",
+           x = "Weight (kg)", y = "CL (L/h)") +
+      theme_minimal()
+    
+    p2 <- ggplot(subjects, aes(x = CRCL, y = CL)) +
+      geom_point() +
+      geom_smooth(method = "lm", se = TRUE) +
+      labs(title = "CrCl vs Clearance",
+           x = "CrCl (mL/min)", y = "CL (L/h)") +
+      theme_minimal()
+    
+    grid.arrange(p1, p2, ncol = 2)
+  })
+  
+  # Subgroup analysis
+  output$subgroupPlot <- renderPlot({
+    pk_data <- study_data()$pk_data
+    subjects <- study_data()$subjects
+    
+    # Create subgroups
+    subjects <- subjects %>%
+      mutate(
+        age_group = case_when(
+          AGE < 40 ~ "<40",
+          AGE >= 40 & AGE < 60 ~ "40-59",
+          AGE >= 60 ~ "60+"
+        ),
+        weight_group = case_when(
+          WEIGHT < 60 ~ "<60 kg",
+          WEIGHT >= 60 & WEIGHT < 80 ~ "60-79 kg",
+          WEIGHT >= 80 ~ "80+ kg"
+        )
+      )
+    
+    # Calculate PK parameters by subgroup
+    pk_params <- pk_data %>%
+      filter(TIME > 0, CONC > 0) %>%
+      group_by(SUBJID) %>%
+      summarise(Cmax = max(CONC), .groups = "drop")
+    
+    subgroup_data <- subjects %>%
+      select(SUBJID, age_group, weight_group, SEX) %>%
+      left_join(pk_params, by = "SUBJID")
+    
+    # Subgroup plots
+    p1 <- ggplot(subgroup_data, aes(x = age_group, y = Cmax, fill = age_group)) +
+      geom_boxplot() +
+      labs(title = "Age Subgroup Analysis",
+           x = "Age Group", y = "Cmax (ng/mL)") +
+      theme_minimal() +
+      theme(legend.position = "none")
+    
+    p2 <- ggplot(subgroup_data, aes(x = weight_group, y = Cmax, fill = weight_group)) +
+      geom_boxplot() +
+      labs(title = "Weight Subgroup Analysis",
+           x = "Weight Group", y = "Cmax (ng/mL)") +
+      theme_minimal() +
+      theme(legend.position = "none")
+    
+    grid.arrange(p1, p2, ncol = 2)
+  })
+  
+  # Export functionality
+  output$exportData <- downloadHandler(
+    filename = function() {
+      paste0(input$exportType, "_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      data <- switch(input$exportType,
+        "PK Parameters" = {
+          pk_data <- study_data()$pk_data
+          pk_data %>%
+            filter(TIME > 0, CONC > 0) %>%
+            group_by(SUBJID) %>%
+            summarise(
+              Cmax = max(CONC),
+              Tmax = TIME[which.max(CONC)],
+              AUC = sum(CONC * diff(c(0, TIME))),
+              .groups = "drop"
+            )
+        },
+        "PD Parameters" = {
+          pd_data <- study_data()$pd_data
+          pd_data %>%
+            group_by(SUBJID) %>%
+            summarise(
+              Emax = max(EFFECT),
+              Tmax_effect = TIME[which.max(EFFECT)],
+              .groups = "drop"
+            )
+        },
+        "Model Results" = {
+          study_data()$subjects
+        },
+        "Simulation Results" = {
+          data.frame(
+            Parameter = c("Dose", "Interval", "Duration", "Simulations"),
+            Value = c(input$simDose, input$simInterval, input$simDuration, input$mcSims)
+          )
+        }
+      )
+      write.csv(data, file, row.names = FALSE)
+    }
+  )
+  
+  output$exportReport <- downloadHandler(
+    filename = function() {
+      paste0("Pharmaco_Report_", Sys.Date(), ".html")
+    },
+    content = function(file) {
+      # Generate comprehensive report
+      # Note: Add pharmaco_report.Rmd to enable HTML report generation
+      # For now, export as CSV with summary
+      html_content <- paste0(
+        "<html><body>",
+        "<h1>Pharmacometric Modeling Report</h1>",
+        "<p>Generated: ", Sys.time(), "</p>",
+        "<p>This is a placeholder. Add pharmaco_report.Rmd for full reporting.</p>",
+        "</body></html>"
+      )
+      writeLines(html_content, file)
+    }
+  )
+}
+
+# Run the app
+shinyApp(ui, server)

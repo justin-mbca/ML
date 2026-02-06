@@ -1,0 +1,10 @@
+name: pharmacomodel-dashboard
+title:
+username: justin-zhang
+account: justin-zhang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16610430
+bundleId: 11544617
+url: https://justin-zhang.shinyapps.io/pharmacomodel-dashboard/
+version: 1

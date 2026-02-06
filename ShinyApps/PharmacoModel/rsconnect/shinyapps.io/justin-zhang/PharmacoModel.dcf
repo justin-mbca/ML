@@ -1,0 +1,13 @@
+name: PharmacoModel
+title: PharmacoModel
+username: justin-zhang
+account: justin-zhang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16612370
+bundleId: 11546447
+url: https://justin-zhang.shinyapps.io/PharmacoModel/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_full.R|app_simplified.R|app_test.log|deploy_fix.R|deploy.R

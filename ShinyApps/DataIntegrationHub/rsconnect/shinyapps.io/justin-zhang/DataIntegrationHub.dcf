@@ -1,0 +1,13 @@
+name: DataIntegrationHub
+title: DataIntegrationHub
+username: justin-zhang
+account: justin-zhang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16612473
+bundleId: 11546482
+url: https://justin-zhang.shinyapps.io/DataIntegrationHub/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: deploy.R

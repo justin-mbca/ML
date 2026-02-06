@@ -1,0 +1,13 @@
+name: ClinicalTrialSuite
+title: ClinicalTrialSuite
+username: justin-zhang
+account: justin-zhang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16612452
+bundleId: 11546472
+url: https://justin-zhang.shinyapps.io/ClinicalTrialSuite/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: deploy.R

@@ -2,22 +2,47 @@
 # Senior Shiny Developer Portfolio Project
 # Demonstrates integration with Pharmaverse tools and Admiral package
 
-library(shiny)
-library(shinydashboard)
-library(DT)
-library(plotly)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(lubridate)
-library(shinycssloaders)
-library(shinyWidgets)
-library(readr)
-library(jsonlite)
-library(admiral)
-library(admiral.test)
-library(xgxr)
-library(pharmaverse)
+# Check and load required packages
+required_packages <- c(
+  "shiny", "shinydashboard", "DT", "plotly", "dplyr", "tidyr", "ggplot2", 
+  "lubridate", "shinycssloaders", "shinyWidgets", "readr", "jsonlite",
+  "admiral", "admiral.test", "xgxr", "pharmaverse"
+)
+
+missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
+
+if (length(missing_packages) > 0) {
+  stop(
+    "Missing required packages. Please install them using:\n\n",
+    "# Install CRAN packages:\n",
+    "install.packages(c('", paste(required_packages[1:13], collapse = "', '"), "'))\n\n",
+    "# Install Pharmaverse packages:\n",
+    "install.packages(c('", paste(required_packages[14:16], collapse = "', '"), "'), ",
+    "repos = 'https://pharmaverse.r-universe.dev')\n\n",
+    "Or run: install_pharmaverse_demo_packages()"
+  )
+}
+
+# Load all packages
+invisible(lapply(required_packages, library, character.only = TRUE))
+
+# Installation helper function (for user convenience)
+install_pharmaverse_demo_packages <- function() {
+  cat("Installing required packages for Pharmaverse Demo...\n")
+  
+  # Install CRAN packages
+  cran_packages <- required_packages[1:13]
+  cat("Installing CRAN packages:\n")
+  install.packages(cran_packages, dependencies = TRUE)
+  
+  # Install Pharmaverse packages
+  pharmaverse_packages <- required_packages[14:16]
+  cat("Installing Pharmaverse packages:\n")
+  install.packages(pharmaverse_packages, repos = "https://pharmaverse.r-universe.dev")
+  
+  cat("All packages installed successfully!\n")
+  cat("You can now run the app: shiny::runApp()\n")
+}
 
 # Generate CDISC-compliant data using Pharmaverse tools
 generate_pharmaverse_data <- function() {
