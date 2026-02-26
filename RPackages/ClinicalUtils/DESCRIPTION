@@ -3,7 +3,7 @@ Title: Clinical Data Processing Utilities for Clinical Trials
 Version: 1.0.0
 Authors@R: 
     person("Justin", "Zhang", 
-           email = "justin@example.com",
+           email = "[redacted]",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0000-0000-0000"))
 Description: A comprehensive R package for clinical trial data processing,

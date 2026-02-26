@@ -117,7 +117,7 @@ Type: Package
 Title: Clinical Data Analysis Utilities
 Version: 0.1.0
 Author: Justin Zhang
-Maintainer: Justin Zhang <justin@example.com>
+Maintainer: Justin Zhang <[redacted]>
 Description: Tools for clinical data analysis and CDISC compliance
 License: MIT
 Depends: R (>= 4.0.0)

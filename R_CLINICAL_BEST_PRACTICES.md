@@ -435,7 +435,7 @@ Package: ClinicalUtils
 Title: Clinical Data Processing Utilities
 Version: 1.0.0
 Authors@R: person("Justin", "Zhang", 
-                email = "justin@example.com",
+                email = "[redacted]",
                 role = c("aut", "cre"))
 Description: Utilities for processing and analyzing clinical trial data
     according to CDISC standards. Includes functions for data validation,
