@@ -201,7 +201,7 @@ ui <- dashboardPage(
         ),
         
         fluidRow(
-          box(title = "💡 For Interviewers", width = 12, status = "primary",
+          box(title = "💡 Key Takeaways", width = 12, status = "primary",
               tags$div(style = "font-size: 14px;",
                 tags$p("This dashboard showcases:"),
                 tags$ul(
